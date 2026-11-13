@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="plum">#241733</color>
+    <style name="AppTheme" parent="android:Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/plum</item>
+        <item name="android:statusBarColor">@color/plum</item>
+        <item name="android:navigationBarColor">@color/plum</item>
+    </style>
+</resources>

@@ -1,0 +1,40 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.markdave.soundstudio'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'com.markdave.soundstudio'
+        minSdk 23
+        targetSdk 34
+        // Each GitHub build gets a higher number, so new builds install over old ones.
+        versionCode((System.getenv('GITHUB_RUN_NUMBER') ?: '1').toInteger())
+        versionName '1.1'
+    }
+
+    // One shared key for every build, so updates install without uninstalling first.
+    signingConfigs {
+        shared {
+            storeFile file('soundstudio.keystore')
+            storePassword 'soundstudio'
+            keyAlias 'soundstudio'
+            keyPassword 'soundstudio'
+        }
+    }
+
+    buildTypes {
+        debug { signingConfig signingConfigs.shared }
+        release {
+            signingConfig signingConfigs.shared
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
