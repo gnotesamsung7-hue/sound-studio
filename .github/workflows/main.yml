@@ -1,0 +1,60 @@
+name: Build APK and website
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: "8.7"
+      - name: Build APK
+        run: gradle assembleDebug --no-daemon
+      - name: Name the APK
+        run: cp app/build/outputs/apk/debug/app-debug.apk SoundStudio.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: SoundStudio-apk
+          path: SoundStudio.apk
+      # Makes the QR download link work:
+      # https://github.com/<you>/sound-studio/releases/latest/download/SoundStudio.apk
+      - name: Publish release
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: Sound Studio build ${{ github.run_number }}
+          files: SoundStudio.apk
+          make_latest: true
+
+  # Puts the web version at https://<you>.github.io/sound-studio/
+  # Needs Settings > Pages > Source: GitHub Actions (one time).
+  website:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare site
+        run: mkdir site && cp app/src/main/assets/index.html site/index.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deploy
+        uses: actions/deploy-pages@v4
